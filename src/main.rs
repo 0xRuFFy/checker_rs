@@ -10,7 +10,7 @@ fn main() {
     let mut board = Board::new();
 
     println!("{}", board);
-    
+
     board.move_piece(16, 25);
 
     println!("{}", board);
