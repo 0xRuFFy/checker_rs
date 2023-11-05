@@ -1,17 +1,16 @@
-#![allow(dead_code)]
-
-mod core;
-
-use core::Board;
+use checkers_core::Board;
 
 fn main() {
-    // println!("Hello, world!");
+    println!("Hello, world!");
 
     let mut board = Board::new();
 
     println!("{}", board);
 
-    board.move_piece(16, 25);
+    println!("{:?}", board.get_possible_moves_of(2));
+    for i in board.get_possible_moves_of(2).unwrap() {
+        println!("{}", Board::is_valid_id(i));
+    }
 
-    println!("{}", board);
+    // println!("{}", board);
 }

@@ -5,8 +5,10 @@ const WHITE: PieceColor = true;
 const BLACK: PieceColor = false;
 
 type Bitboard = u64;
-const DEFAULT_WHITE: Bitboard = 0x000000000055aa55;
-const DEFAULT_BLACK: Bitboard = 0xaa55aa0000000000;
+// const DEFAULT_WHITE: Bitboard = 0x000000000055aa55;
+// const DEFAULT_BLACK: Bitboard = 0xaa55aa0000000000;
+const DEFAULT_WHITE: Bitboard = 0x0000000000000055;
+const DEFAULT_BLACK: Bitboard = 0x0000000000000000;
 
 type PieceType = bool;
 const MAN: PieceType = false;
@@ -29,13 +31,30 @@ impl Board {
         return Board {
             white: DEFAULT_WHITE,
             black: DEFAULT_BLACK,
-            kings: 0,
+            kings: 0x0000000000000055,
+            // kings: 0,
         };
     }
 
     // ------------------- STATIC -------------------
     pub(crate) fn get_id_from_coords(row: u8, col: u8) -> u8 {
         return row * 8 + col;
+    }
+
+    pub fn is_valid_id(id: u8) -> bool {
+        return id < 64 && (id % 8 + id / 8) % 2 == 0;
+    }
+
+    pub fn is_valid_id_signed(id: i8) -> bool {
+        return id >= 0 && Self::is_valid_id(id as u8);
+    }
+
+    pub fn is_valid_and_empty(&self, id: u8) -> bool {
+        return Self::is_valid_id(id) && (self.white | self.black) & 1 << id == 0;
+    }
+
+    pub fn is_valid_and_empty_signed(&self, id: i8) -> bool {
+        return Self::is_valid_id_signed(id) && (self.white | self.black) & 1 << id as u8 == 0;
     }
 
     // ------------------- PRIVATE -------------------
@@ -92,13 +111,40 @@ impl Board {
         self.kings |= 1 << id;
     }
 
-    pub(crate) fn get_possible_moves_of(&self, id: u8) -> Option<Vec<u8>> {
+    // TODO
+    // pub(crate) fn get_possible_moves_of(&self, id: u8) -> Option<Vec<u8>> {
+    pub fn get_possible_moves_of(&self, id: u8) -> Option<Vec<u8>> {
         let piece = self.get_piece(id)?;
         let (color, piece_type) = piece;
         let dir = if color == WHITE { 1 } else { -1 };
 
         let mut possible_moves = Vec::new();
-        let all = self.white | self.black;
+
+        let m = id as i8 + 7 * dir;
+        if self.is_valid_and_empty_signed(m) {
+            possible_moves.push(m as u8);
+        }
+
+        let m = id as i8 + 9 * dir;
+        if self.is_valid_and_empty_signed(m) {
+            possible_moves.push(m as u8);
+        }
+
+        if piece_type == KING {
+            let m = id as i8 - 7 * dir;
+            if self.is_valid_and_empty_signed(m) {
+                possible_moves.push(m as u8);
+            }
+
+            let m = id as i8 - 9 * dir;
+            if self.is_valid_and_empty_signed(m) {
+                possible_moves.push(m as u8);
+            }
+        }
+
+
+        // possible_moves.push((id as i8 + 7 * dir) as u8);
+        // possible_moves.push((id as i8 + 9 * dir) as u8);
 
         return Some(possible_moves);
     }
