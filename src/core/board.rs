@@ -20,7 +20,9 @@ pub struct Board {
     kings: Bitboard,
 }
 
+// Note: Most of the following methods [pub(crate)] are not part of the public API. --> the validity of the arguments is not checked. !!!
 impl Board {
+    // ------------------- CONSTRUCTOR -------------------
     pub fn new() -> Board {
         return Board {
             white: DEFAULT_WHITE,
@@ -29,11 +31,18 @@ impl Board {
         };
     }
 
-    pub fn get_id_from_coords(row: u8, col: u8) -> u8 {
+    // ------------------- STATIC -------------------
+    pub(crate) fn get_id_from_coords(row: u8, col: u8) -> u8 {
         return row * 8 + col;
     }
 
-    pub fn get_piece(&self, id: u8) -> Option<Piece> {
+    // ------------------- PRIVATE -------------------
+    fn count_kings(&self, color: PieceColor) -> u8 {
+        return (if color == WHITE { self.white } else { self.black } & self.kings).count_ones() as u8;
+    }
+
+    // ------------------- PUB(CRATE) -------------------
+    pub(crate) fn get_piece(&self, id: u8) -> Option<Piece> {
         let piece_type = self.kings & 1 << id != 0;
 
         if self.white & 1 << id != 0 {
@@ -45,10 +54,53 @@ impl Board {
         return None;
     }
 
-    pub fn get_piece_by_coords(&self, row: u8, col: u8) -> Option<Piece> {
+    pub(crate) fn get_piece_by_coords(&self, row: u8, col: u8) -> Option<Piece> {
         let id = Board::get_id_from_coords(row, col);
 
         return self.get_piece(id);
+    }
+
+    pub(crate) fn move_piece(&mut self, from: u8, to: u8) {
+        if self.white & 1 << from != 0 {
+            self.white &= !(1 << from);
+            self.white |= 1 << to;
+        } else if self.black & 1 << from != 0 {
+            self.black &= !(1 << from);
+            self.black |= 1 << to;
+        }
+
+        if self.kings & 1 << from != 0 {
+            self.kings &= !(1 << from);
+            self.kings |= 1 << to;
+        }
+    }
+
+    pub(crate) fn remove_piece(&mut self, id: u8) {
+        self.white &= !(1 << id);
+        self.black &= !(1 << id);
+        self.kings &= !(1 << id);
+    }
+
+    pub(crate) fn king_piece(&mut self, id: u8) {
+        self.kings |= 1 << id;
+    }
+
+
+    // ------------------- PUBLIC -------------------
+    pub fn white_count(&self) -> u8 {
+        return self.white.count_ones() as u8;
+    }
+
+    pub fn black_count(&self) -> u8 {
+        return self.black.count_ones() as u8;
+    }
+
+    pub fn white_king_count(&self) -> u8 {
+        return self.count_kings(WHITE);
+    }
+
+    pub fn black_king_count(&self) -> u8 {
+        return self.count_kings(BLACK);
     }
 }
 
