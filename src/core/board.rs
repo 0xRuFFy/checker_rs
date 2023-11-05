@@ -17,6 +17,8 @@ type Piece = (PieceColor, PieceType);
 pub struct Board {
     white: Bitboard,
     black: Bitboard,
+
+    /// Bitboard of all kings. This is a subset of the white and black bitboards.
     kings: Bitboard,
 }
 
@@ -38,7 +40,12 @@ impl Board {
 
     // ------------------- PRIVATE -------------------
     fn count_kings(&self, color: PieceColor) -> u8 {
-        return (if color == WHITE { self.white } else { self.black } & self.kings).count_ones() as u8;
+        return (if color == WHITE {
+            self.white
+        } else {
+            self.black
+        } & self.kings)
+            .count_ones() as u8;
     }
 
     // ------------------- PUB(CRATE) -------------------
@@ -85,6 +92,20 @@ impl Board {
         self.kings |= 1 << id;
     }
 
+    pub(crate) fn get_possible_moves_of(&self, id: u8) -> Option<Vec<u8>> {
+        let piece = self.get_piece(id)?;
+        let (color, piece_type) = piece;
+        let dir = if color == WHITE { 1 } else { -1 };
+
+        let mut possible_moves = Vec::new();
+        let all = self.white | self.black;
+
+        return Some(possible_moves);
+    }
+
+    pub(crate) fn get_possible_moves_of_by_coords(&self, row: u8, col: u8) -> Option<Vec<u8>> {
+        return self.get_possible_moves_of(Self::get_id_from_coords(row, col));
+    }
 
     // ------------------- PUBLIC -------------------
     pub fn white_count(&self) -> u8 {
@@ -101,6 +122,15 @@ impl Board {
 
     pub fn black_king_count(&self) -> u8 {
         return self.count_kings(BLACK);
+    }
+
+    // TODO: Could use a hashmap to store the possible moves of each piece. (more memory, less computation is expected but needs to be tested in comparison to Vector lookup)
+    pub fn get_white_possible_moves(&self) -> Vec<(u8, Vec<u8>)> {
+        todo!();
+    }
+
+    pub fn get_black_possible_moves(&self) -> Vec<(u8, Vec<u8>)> {
+        todo!();
     }
 }
 
