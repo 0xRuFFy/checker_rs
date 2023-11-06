@@ -1,5 +1,11 @@
+mod alpha_beta_player;
+mod alpha_zero_player;
+mod bot_player;
 mod human_player;
+mod minimax_player;
+mod monte_carlo_player;
 
+pub use bot_player::BotPlayer;
 pub use human_player::HumanPlayer;
 
 use checkers_core as core;

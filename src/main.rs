@@ -8,7 +8,8 @@ fn main() {
 
     let mut game = CheckersGame::new(
         Box::new(player::HumanPlayer::new()),
-        Box::new(player::HumanPlayer::new()),
+        // Box::new(player::HumanPlayer::new()),
+        Box::new(player::BotPlayer::minimax()),
     );
 
     game.play();
