@@ -1,14 +1,15 @@
-use checkers_core as core;
+mod game;
+mod player;
+
+use game::CheckersGame;
 
 fn main() {
     println!("Hello, world!");
 
-    let board = core::Board::new();
+    let mut game = CheckersGame::new(
+        Box::new(player::HumanPlayer::new()),
+        Box::new(player::HumanPlayer::new()),
+    );
 
-    // println!("{}", board.to_string(board.get_white_possible_moves()));
-    println!("{}", board);
-
-    println!("{:?}", board.get_white_possible_moves());
-
-    // println!("{}", board);
+    game.play();
 }

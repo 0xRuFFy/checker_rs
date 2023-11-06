@@ -108,36 +108,6 @@ impl Board {
             .collect();
     }
 
-    fn get_color_possible_moves(&self, color: PieceColor) -> Vec<(u8, Vec<u8>)> {
-        let (count, bitboard) = if color == WHITE {
-            (self.white_count() as usize, self.white)
-        } else {
-            (self.black_count() as usize, self.black)
-        };
-        if count == 0 {
-            return Vec::new();
-        }
-
-        let mut moves = Vec::new();
-        let mut can_jump = false;
-
-        for i in 0..64 {
-            if bitboard & 1 << i != 0 {
-                if let Some((moves_of_i, move_type)) = self.get_possible_moves_of(i) {
-                    can_jump |= move_type;
-                    if moves_of_i.len() > 0 && (!can_jump || move_type) {
-                        moves.push((i, moves_of_i));
-                    }
-                }
-            }
-            if moves.len() == count {
-                break;
-            }
-        }
-
-        return moves;
-    }
-
     // ------------------- PUB(CRATE) -------------------
     pub(crate) fn get_piece(&self, id: u8) -> Option<Piece> {
         let piece_type = self.kings & 1 << id != 0;
@@ -213,14 +183,37 @@ impl Board {
     }
 
     // TODO: Could use a hashmap to store the possible moves of each piece. (more memory, less computation is expected but needs to be tested in comparison to Vector lookup)
-    pub fn get_white_possible_moves(&self) -> Vec<(u8, Vec<u8>)> {
-        return self.get_color_possible_moves(WHITE);
+    pub fn get_possible_moves(&self, color: PieceColor) -> Vec<(u8, Vec<u8>)> {
+        let (count, bitboard) = if color == WHITE {
+            (self.white_count() as usize, self.white)
+        } else {
+            (self.black_count() as usize, self.black)
+        };
+        if count == 0 {
+            return Vec::new();
+        }
+
+        let mut moves = Vec::new();
+        let mut can_jump = false;
+
+        for i in 0..64 {
+            if bitboard & 1 << i != 0 {
+                if let Some((moves_of_i, move_type)) = self.get_possible_moves_of(i) {
+                    can_jump |= move_type;
+                    if moves_of_i.len() > 0 && (!can_jump || move_type) {
+                        moves.push((i, moves_of_i));
+                    }
+                }
+            }
+            if moves.len() == count {
+                break;
+            }
+        }
+
+        return moves;
     }
 
-    pub fn get_black_possible_moves(&self) -> Vec<(u8, Vec<u8>)> {
-        return self.get_color_possible_moves(BLACK);
-    }
-
+    // TODO: Remove jumped pieces
     pub fn move_piece(&mut self, from: u8, to: u8) {
         if self.white & 1 << from != 0 {
             self.white &= !(1 << from);
