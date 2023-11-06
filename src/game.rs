@@ -1,5 +1,6 @@
 use crate::player::Player;
 use checkers_core as core;
+use std::time::Instant;
 
 #[derive(Debug, PartialEq)]
 pub enum GameState {
@@ -41,14 +42,18 @@ impl CheckersGame {
     }
 
     fn turn(&mut self) {
+        let start = Instant::now();
         let (from, to) = self.player.0.get_move(&mut self.board);
+        println!("Time: {}ms", start.elapsed().as_millis());
         self.board.move_piece(from, to);
         self.turn = !self.turn;
         if self.check_game_state() {
             return;
         }
 
+        let start = Instant::now();
         let (from, to) = self.player.1.get_move(&mut self.board);
+        println!("Time: {}ms", start.elapsed().as_millis());
         self.board.move_piece(from, to);
         self.turn = !self.turn;
         if self.check_game_state() {
