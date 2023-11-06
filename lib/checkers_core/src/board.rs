@@ -8,8 +8,6 @@ pub const BLACK: PieceColor = false;
 pub type Bitboard = u64;
 const DEFAULT_WHITE: Bitboard = 0x000000000055aa55;
 const DEFAULT_BLACK: Bitboard = 0xaa55aa0000000000;
-// pub const DEFAULT_WHITE: Bitboard = 0x0000000000550010;
-// pub const DEFAULT_BLACK: Bitboard = 0x000000000000aa00;
 
 pub type PieceType = bool;
 pub const MAN: PieceType = false;
@@ -21,6 +19,7 @@ pub type MoveType = bool;
 pub const MOVE: MoveType = false;
 pub const JUMP: MoveType = true;
 
+#[derive(Clone)]
 pub struct Board {
     white: Bitboard,
     black: Bitboard,
@@ -36,7 +35,6 @@ impl Board {
         return Board {
             white: DEFAULT_WHITE,
             black: DEFAULT_BLACK,
-            // kings: 0x0000000000550000,
             kings: 0,
         };
     }
@@ -121,12 +119,6 @@ impl Board {
         return None;
     }
 
-    pub(crate) fn get_piece_by_coords(&self, row: u8, col: u8) -> Option<Piece> {
-        let id = Board::get_id_from_coords(row, col);
-
-        return self.get_piece(id);
-    }
-
     pub(crate) fn get_possible_moves_of(&self, id: u8) -> Option<(Vec<u8>, MoveType)> {
         let piece = self.get_piece(id)?;
         let (color, piece_type) = piece;
@@ -140,7 +132,7 @@ impl Board {
     }
 
     // ------------------- PUBLIC -------------------
-    pub fn to_string(&self, possible_moves: Vec<(u8, Vec<u8>)>) -> String {
+    pub fn to_string(&self, possible_moves: &Vec<(u8, Vec<u8>)>) -> String {
         let mut board = String::new();
 
         for row in (0..8).rev() {
@@ -166,6 +158,12 @@ impl Board {
         return board;
     }
     
+    pub fn get_piece_by_coords(&self, row: u8, col: u8) -> Option<Piece> {
+        let id = Board::get_id_from_coords(row, col);
+
+        return self.get_piece(id);
+    }
+
     pub fn white_count(&self) -> u8 {
         return self.white.count_ones() as u8;
     }
@@ -183,8 +181,8 @@ impl Board {
     }
 
     // TODO: Could use a hashmap to store the possible moves of each piece. (more memory, less computation is expected but needs to be tested in comparison to Vector lookup)
-    pub fn get_possible_moves(&self, color: PieceColor) -> Vec<(u8, Vec<u8>)> {
-        let (count, bitboard) = if color == WHITE {
+    pub fn get_possible_moves(&self, color: &PieceColor) -> Vec<(u8, Vec<u8>)> {
+        let (count, bitboard) = if *color == WHITE {
             (self.white_count() as usize, self.white)
         } else {
             (self.black_count() as usize, self.black)

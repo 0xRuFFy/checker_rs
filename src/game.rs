@@ -41,14 +41,14 @@ impl CheckersGame {
     }
 
     fn turn(&mut self) {
-        let (from, to) = self.player.0.get_move(&self.board);
+        let (from, to) = self.player.0.get_move(&mut self.board);
         self.board.move_piece(from, to);
         self.turn = !self.turn;
         if self.check_game_state() {
             return;
         }
 
-        let (from, to) = self.player.1.get_move(&self.board);
+        let (from, to) = self.player.1.get_move(&mut self.board);
         self.board.move_piece(from, to);
         self.turn = !self.turn;
         if self.check_game_state() {
