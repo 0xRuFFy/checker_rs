@@ -19,6 +19,7 @@ impl Player for HumanPlayer {
         self.color = color;
     }
 
+    // Note: This function does not need to be efficient since it is only called once and won't be called in in for example a Monte Carlo Tree Search / Minimax algorithm
     fn get_move(&self, board: &core::Board) -> (u8, u8) {
         let possible_moves = board.get_possible_moves(self.color);
         println!("{}", board.to_string(possible_moves.clone()));
