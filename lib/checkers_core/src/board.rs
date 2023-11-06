@@ -182,7 +182,7 @@ impl Board {
 
     // TODO: Could use a hashmap to store the possible moves of each piece. (more memory, less computation is expected but needs to be tested in comparison to Vector lookup)
     pub fn get_possible_moves(&self, color: &PieceColor) -> Vec<(u8, Vec<u8>)> {
-        let (count, bitboard) = if *color == WHITE {
+        let (mut count, bitboard) = if *color == WHITE {
             (self.white_count() as usize, self.white)
         } else {
             (self.black_count() as usize, self.black)
@@ -192,26 +192,31 @@ impl Board {
         }
 
         let mut moves = Vec::new();
+        let mut jumps = Vec::new();
         let mut can_jump = false;
 
         for i in 0..64 {
             if bitboard & 1 << i != 0 {
                 if let Some((moves_of_i, move_type)) = self.get_possible_moves_of(i) {
+                    count -= 1;
                     can_jump |= move_type;
-                    if moves_of_i.len() > 0 && (!can_jump || move_type) {
-                        moves.push((i, moves_of_i));
+                    if moves_of_i.len() > 0 {
+                        if move_type == JUMP {
+                            jumps.push((i, moves_of_i))
+                        } else {
+                            moves.push((i, moves_of_i))
+                        }
                     }
                 }
-            }
-            if moves.len() == count {
-                break;
+                if count == 0 {
+                    break;
+                }
             }
         }
 
-        return moves;
+        return if can_jump { jumps } else { moves };
     }
 
-    // TODO: Remove jumped pieces
     pub fn move_piece(&mut self, from: u8, to: u8) {
         if self.white & 1 << from != 0 {
             self.white &= !(1 << from);
@@ -225,6 +230,21 @@ impl Board {
             self.kings &= !(1 << from);
             self.kings |= 1 << to;
         }
+
+        // remove jumped pieces
+        if (from as i8 - to as i8).abs() == 18 {
+            self.remove_piece((from + to) / 2);
+        } else if (from as i8 - to as i8).abs() == 14 {
+            self.remove_piece((from + to) / 2);
+        }
+
+        // promote to king
+        if self.white & 1 << to != 0 && to / 8 == 7 {
+            self.king_piece(to);
+        } else if self.black & 1 << to != 0 && to / 8 == 0 {
+            self.king_piece(to);
+        }
+
     }
 
     pub fn remove_piece(&mut self, id: u8) {

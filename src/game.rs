@@ -41,6 +41,7 @@ impl CheckersGame {
         return false;
     }
 
+    // TODO: Implement consecutive jumps (has to be the same piece)
     fn turn(&mut self) {
         let start = Instant::now();
         let (from, to) = self.player.0.get_move(&mut self.board);

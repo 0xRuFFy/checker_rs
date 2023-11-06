@@ -1,7 +1,6 @@
 use super::Player;
 use crate::{game::GameState, player::BotPlayer};
 use checkers_core as core;
-use core::board::PieceColor;
 
 pub struct MinimaxPlayer {
     color: core::board::PieceColor,
@@ -56,6 +55,8 @@ impl MinimaxPlayer {
                 }
                 if best_value == value {
                     best_move = Some((from, to));
+                } else {
+                    best_move = option_move;
                 }
             }
         }
@@ -79,7 +80,7 @@ impl Player for MinimaxPlayer {
     }
 
     fn get_move(&self, board: &core::Board) -> (u8, u8) {
-        let (move_option, _) = self.minimax(board, 3, true);
+        let (move_option, _) = self.minimax(board, 6, true);
         return move_option.unwrap();
     }
 }
