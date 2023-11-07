@@ -7,11 +7,16 @@ use super::{
 use checkers_core as core;
 use core::board::PieceColor;
 
+pub enum Depth {
+    Static(u8),
+    Dynamic,
+}
+
 pub struct BotPlayer;
 
 impl BotPlayer {
-    pub fn minimax() -> MinimaxPlayer {
-        MinimaxPlayer::new()
+    pub fn minimax(depth: Depth, eval_version: u8) -> MinimaxPlayer {
+        return MinimaxPlayer::new(depth, eval_version);
     }
 
     pub fn alpha_beta() -> AlphaBetaPlayer {
@@ -35,21 +40,5 @@ impl BotPlayer {
         }
         // TODO: Check for draw
         return GameState::InProgress;
-    }
-
-    pub fn eval_v1(board: &core::Board, color: PieceColor) -> i32 {
-        let mut score = 0;
-        for i in 0..8 {
-            for j in 0..8 {
-                if let Some((piece_color, _)) = board.get_piece_by_coords(i, j) {
-                    if piece_color == color {
-                        score += 1;
-                    } else {
-                        score -= 1;
-                    }
-                }
-            }
-        }
-        return score;
     }
 }

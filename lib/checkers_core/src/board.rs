@@ -164,18 +164,22 @@ impl Board {
         return self.get_piece(id);
     }
 
+    #[inline]
     pub fn white_count(&self) -> u8 {
         return self.white.count_ones() as u8;
     }
 
+    #[inline]
     pub fn black_count(&self) -> u8 {
         return self.black.count_ones() as u8;
     }
 
+    #[inline]
     pub fn white_king_count(&self) -> u8 {
         return self.count_kings(WHITE);
     }
 
+    #[inline]
     pub fn black_king_count(&self) -> u8 {
         return self.count_kings(BLACK);
     }
@@ -217,7 +221,14 @@ impl Board {
         return if can_jump { jumps } else { moves };
     }
 
-    pub fn move_piece(&mut self, from: u8, to: u8) {
+    pub fn get_possible_jumps_of(&self, id: u8) -> Option<Vec<u8>> {
+        let piece = self.get_piece(id)?;
+        let (color, piece_type) = piece;
+
+        return Some(self.get_possible_jumps_for(id, piece_type, color));
+    }
+
+    pub fn move_piece(&mut self, from: u8, to: u8) -> bool {
         if self.white & 1 << from != 0 {
             self.white &= !(1 << from);
             self.white |= 1 << to;
@@ -231,11 +242,14 @@ impl Board {
             self.kings |= 1 << to;
         }
 
+        let mut jumped = true;
         // remove jumped pieces
         if (from as i8 - to as i8).abs() == 18 {
             self.remove_piece((from + to) / 2);
         } else if (from as i8 - to as i8).abs() == 14 {
             self.remove_piece((from + to) / 2);
+        } else {
+            jumped = false;
         }
 
         // promote to king
@@ -245,6 +259,7 @@ impl Board {
             self.king_piece(to);
         }
 
+        return jumped;
     }
 
     pub fn remove_piece(&mut self, id: u8) {
@@ -255,6 +270,44 @@ impl Board {
 
     pub fn king_piece(&mut self, id: u8) {
         self.kings |= 1 << id;
+    }
+
+    pub fn eval_v1(&self, color: PieceColor) -> f32 {
+        let mut score = 0.;
+        let white_multiplier = if color == WHITE { 1 } else { -1 };
+        let black_multiplier = if color == WHITE { -1 } else { 1 };
+
+        score += (self.white_count() as i32 * white_multiplier) as f32;
+        score += (self.white_king_count() as i32 * white_multiplier * 2) as f32;
+        score += (self.black_count() as i32 * black_multiplier) as f32;
+        score += (self.black_king_count() as i32 * black_multiplier * 2) as f32;
+
+        return score;
+    }
+
+    // Version 2 of the evaluation function will value MANs more if they are closer to their KING row
+    // and will value KINGs more if they are closer to the center.
+    pub fn eval_v2(&self, color: PieceColor) -> f32 {
+        let mut score = 0.;
+        for i in 0..8 {
+            for j in 0..8 {
+                if let Some((piece_color, piece_type)) = self.get_piece_by_coords(i, j) {
+                    let color_multiplier = if piece_color == color { 1. } else { -1. };
+                    let position_multiplier: f32;
+                    if piece_type == KING {
+                        position_multiplier = 3. - ((i as f32 - 3.5).abs() + (j as f32 - 3.5).abs()) / 8.;
+                    } else {
+                        position_multiplier = if piece_color == WHITE {
+                            (1 + i) as f32 / 8.
+                        } else {
+                            (8 - i) as f32 / 8.
+                        };
+                    }
+                    score += color_multiplier * position_multiplier;
+                }
+            }
+        }
+        return score;
     }
 }
 

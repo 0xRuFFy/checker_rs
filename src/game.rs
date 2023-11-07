@@ -13,7 +13,8 @@ pub struct CheckersGame {
     pub board: core::Board,
     pub turn: core::board::PieceColor,
     pub state: GameState,
-    pub player: (Box<dyn Player>, Box<dyn Player>),
+    pub player: [Box<dyn Player>; 2],
+    current_player: usize,
 }
 
 impl CheckersGame {
@@ -24,8 +25,21 @@ impl CheckersGame {
             board: core::Board::new(),
             turn: core::board::WHITE,
             state: GameState::InProgress,
-            player: (player1, player2),
+            player: [player1, player2],
+            current_player: 0,
         };
+    }
+
+    fn show(&self, possible_moves: &Vec<(u8, Vec<u8>)>) {
+        println!("{}", self.board.to_string(&possible_moves));
+        for (i, (from, moves)) in possible_moves.clone().into_iter().enumerate() {
+            print!("{}: {} -> {{ ", i, from);
+            for (j, to) in moves.into_iter().enumerate() {
+                print!("{}: {}, ", j, to);
+            }
+            print!("}} ");
+        }
+        println!();
     }
 
     fn check_game_state(&mut self) -> bool {
@@ -41,25 +55,33 @@ impl CheckersGame {
         return false;
     }
 
-    // TODO: Implement consecutive jumps (has to be the same piece)
+    // TODO: Remove code duplication between player.0 and player.1
     fn turn(&mut self) {
-        let start = Instant::now();
-        let (from, to) = self.player.0.get_move(&mut self.board);
-        println!("Time: {}ms", start.elapsed().as_millis());
-        self.board.move_piece(from, to);
-        self.turn = !self.turn;
-        if self.check_game_state() {
-            return;
+        let possible_moves = self.board.get_possible_moves(&self.turn);
+        self.show(&possible_moves);
+        let (from, to) = self.player[self.current_player].get_move(&self.board, &possible_moves);
+        let mut jumped = self.board.move_piece(from, to);
+        while jumped {
+            if self.check_game_state() {
+                return;
+            }
+            if let Some(possible_jumps) = self.board.get_possible_jumps_of(to) {
+                if possible_jumps.len() == 0 {
+                    break;
+                }
+                let possible_jumps = vec![(to, possible_jumps)];
+                self.show(&possible_jumps);
+                let (from, to) =
+                    self.player[self.current_player].get_move(&self.board, &possible_jumps);
+                jumped = self.board.move_piece(from, to);
+            } else {
+                break;
+            }
         }
 
-        let start = Instant::now();
-        let (from, to) = self.player.1.get_move(&mut self.board);
-        println!("Time: {}ms", start.elapsed().as_millis());
-        self.board.move_piece(from, to);
         self.turn = !self.turn;
-        if self.check_game_state() {
-            return;
-        }
+        self.current_player = (self.current_player + 1) % 2;
+        self.check_game_state();
     }
 
     pub fn play(&mut self) {
@@ -68,7 +90,7 @@ impl CheckersGame {
         }
 
         match self.state {
-            GameState::Winner(color) => println!("{} won!", color),
+            GameState::Winner(color) => println!("{} won!", if color { "White" } else { "Black" }),
             // GameState::Draw => println!("Draw!"),
             _ => (),
         }
