@@ -27,7 +27,7 @@ impl Player for AlphaBetaPlayer {
         todo!()
     }
 
-    fn get_move(&self, board: &core::Board, possible_moves: &Vec<(u8, Vec<u8>)>) -> (u8, u8) {
+    fn get_move(&mut self, board: &core::Board, possible_moves: &Vec<(u8, Vec<u8>)>) -> (u8, u8) {
         todo!()
     }
 }

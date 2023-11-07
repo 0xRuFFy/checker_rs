@@ -20,7 +20,7 @@ impl Player for HumanPlayer {
     }
 
     // Note: This function does not need to be efficient since it is only called once and won't be called in in for example a Monte Carlo Tree Search / Minimax algorithm
-    fn get_move(&self, board: &core::Board, possible_moves: &Vec<(u8, Vec<u8>)>) -> (u8, u8) {
+    fn get_move(&mut self, board: &core::Board, possible_moves: &Vec<(u8, Vec<u8>)>) -> (u8, u8) {
         let moves_count = possible_moves.len();
         let mut input = String::new();
         let from: u8;

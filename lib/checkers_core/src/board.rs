@@ -19,7 +19,7 @@ pub type MoveType = bool;
 pub const MOVE: MoveType = false;
 pub const JUMP: MoveType = true;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Board {
     white: Bitboard,
     black: Bitboard,

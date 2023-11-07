@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::{bot_player::Depth, Player};
 use crate::{game::GameState, player::bot_player::BotPlayer};
 use checkers_core as core;
@@ -6,6 +8,7 @@ pub struct MinimaxPlayer {
     color: core::board::PieceColor,
     depth: Depth,
     eval_version: u8,
+    transposition_table: HashMap<core::Board, f32>,
 }
 
 impl MinimaxPlayer {
@@ -17,10 +20,17 @@ impl MinimaxPlayer {
             color: core::board::WHITE,
             depth,
             eval_version,
+            transposition_table: HashMap::new(),
         }
     }
 
-    fn minimax(&self, board: &core::Board, depth: u8, maximizing_player: bool) -> f32 {
+    fn minimax(&mut self, board: &core::Board, depth: u8, maximizing_player: bool) -> f32 {
+        if let Some(value) = self.transposition_table.get(board) {
+            // println!("Cache hit");
+            // TODO: Cache is not updated -> cache position must not have been calculated with the same depth
+            return *value;
+        }
+
         if depth == 0 {
             match self.eval_version {
                 1 => return board.eval_v1(self.color),
@@ -58,6 +68,7 @@ impl MinimaxPlayer {
                 new_board.move_piece(from, to);
 
                 let value = self.minimax(&new_board, depth - 1, !maximizing_player);
+                self.transposition_table.insert(new_board, value);
                 if maximizing_player {
                     best_value = best_value.max(value);
                 } else {
@@ -67,6 +78,10 @@ impl MinimaxPlayer {
         }
 
         return best_value;
+    }
+
+    pub fn clear_transposition_table(&mut self) {
+        self.transposition_table.clear();
     }
 }
 
@@ -84,7 +99,7 @@ impl Player for MinimaxPlayer {
         return self.color;
     }
 
-    fn get_move(&self, board: &core::Board, possible_moves: &Vec<(u8, Vec<u8>)>) -> (u8, u8) {
+    fn get_move(&mut self, board: &core::Board, possible_moves: &Vec<(u8, Vec<u8>)>) -> (u8, u8) {
         let mut best_move = (0, 0);
         let mut best_value = f32::NEG_INFINITY;
         let depth = match self.depth {
@@ -94,12 +109,13 @@ impl Player for MinimaxPlayer {
                     .iter()
                     .map(|(_, tos)| tos.len())
                     .sum::<usize>();
+                // TODO: Use more sophisticated formula
                 if pmc < 2 {
-                    9
+                    12
                 } else if pmc < 4 {
-                    7
+                    10
                 } else {
-                    5
+                    7
                 }
             }
         };
@@ -109,7 +125,7 @@ impl Player for MinimaxPlayer {
                 new_board.move_piece(*from, *to);
 
                 let value = self.minimax(&new_board, depth, false);
-                // println!("{} -> {}: {}", from, to, value);
+                println!("{} -> {}: {}", from, to, value);
                 if value > best_value {
                     best_value = value;
                     best_move = (*from, *to);
@@ -117,6 +133,7 @@ impl Player for MinimaxPlayer {
             }
         }
 
+        // println!("{}", self.transposition_table.len());
         return best_move;
     }
 }

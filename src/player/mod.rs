@@ -15,5 +15,5 @@ pub trait Player {
     fn init(&mut self, color: core::board::PieceColor);
     fn get_color(&self) -> core::board::PieceColor;
     fn swap_color(&mut self) -> core::board::PieceColor;
-    fn get_move(&self, board: &core::Board, possible_moves: &Vec<(u8, Vec<u8>)>) -> (u8, u8);
+    fn get_move(&mut self, board: &core::Board, possible_moves: &Vec<(u8, Vec<u8>)>) -> (u8, u8);
 }
