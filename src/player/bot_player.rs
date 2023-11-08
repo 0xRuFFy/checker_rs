@@ -5,8 +5,8 @@ use super::{
     minimax_player::MinimaxPlayer, monte_carlo_player::MonteCarloPlayer,
 };
 use checkers_core as core;
-use core::board::PieceColor;
 
+#[derive(Clone, Copy)]
 pub enum Depth {
     Static(u8),
 }
@@ -15,7 +15,7 @@ pub struct BotPlayer;
 
 impl BotPlayer {
     pub fn minimax(depth: Depth, eval_version: u8) -> MinimaxPlayer {
-        return MinimaxPlayer::new(depth, eval_version);
+        return MinimaxPlayer::new(&depth, eval_version);
     }
 
     pub fn monte_carlo() -> MonteCarloPlayer {

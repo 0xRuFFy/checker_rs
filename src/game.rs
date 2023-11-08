@@ -1,6 +1,5 @@
 use crate::player::Player;
 use checkers_core as core;
-use std::time::Instant;
 
 #[derive(Debug, PartialEq)]
 pub enum GameState {
@@ -30,16 +29,33 @@ impl CheckersGame {
         };
     }
 
+    pub fn id_to_chess_notation(id: u8) -> String {
+        let row = (id / 8) + 1;
+        let col = (id % 8) + 1;
+        let col = match col {
+            1 => "a",
+            2 => "b",
+            3 => "c",
+            4 => "d",
+            5 => "e",
+            6 => "f",
+            7 => "g",
+            8 => "h",
+            _ => panic!("Invalid column"),
+        };
+        return format!("{}{}", col, row);
+    }
+
     fn show(&self, possible_moves: &Vec<(u8, Vec<u8>)>) {
         println!("{}", self.board.to_string(&possible_moves));
-        // for (i, (from, moves)) in possible_moves.clone().into_iter().enumerate() {
-        //     print!("{}: {} -> {{\n", i, from);
-        //     for (j, to) in moves.into_iter().enumerate() {
-        //         print!("    {}: {}, \n", j, to);
-        //     }
-        //     print!("}}\n");
-        // }
-        // println!();
+        for (i, (from, moves)) in possible_moves.clone().into_iter().enumerate() {
+            print!("{}: {} -> {{\n", i, Self::id_to_chess_notation(from));
+            for (j, to) in moves.into_iter().enumerate() {
+                print!("    {}: {}, \n", j, Self::id_to_chess_notation(to));
+            }
+            print!("}}\n");
+        }
+        println!();
     }
 
     fn check_game_state(&mut self) -> bool {
@@ -58,9 +74,13 @@ impl CheckersGame {
     // TODO: Remove code duplication between player.0 and player.1
     fn turn(&mut self) {
         let possible_moves = self.board.get_possible_moves(&self.turn);
+        if possible_moves.len() == 0 {
+            self.state = GameState::Winner(!self.turn);
+            return;
+        }
         self.show(&possible_moves);
         let (from, to) = self.player[self.current_player].get_move(&self.board, &possible_moves);
-        let mut jumped = self.board.move_piece(from, to);
+        let (mut jumped, _) = self.board.move_piece(from, to);
         while jumped {
             if self.check_game_state() {
                 return;
@@ -73,7 +93,7 @@ impl CheckersGame {
                 self.show(&possible_jumps);
                 let (from, to) =
                     self.player[self.current_player].get_move(&self.board, &possible_jumps);
-                jumped = self.board.move_piece(from, to);
+                jumped = self.board.move_piece(from, to).0;
             } else {
                 break;
             }

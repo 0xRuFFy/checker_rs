@@ -1,5 +1,8 @@
-use std::fmt::{Display, Formatter, Result};
 use colored::*;
+use std::{
+    fmt::{Display, Formatter, Result},
+    hash::{Hash, Hasher},
+};
 
 pub type PieceColor = bool;
 pub const WHITE: PieceColor = true;
@@ -19,13 +22,21 @@ pub type MoveType = bool;
 pub const MOVE: MoveType = false;
 pub const JUMP: MoveType = true;
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Board {
     white: Bitboard,
     black: Bitboard,
 
     /// Bitboard of all kings. This is a subset of the white and black bitboards.
     kings: Bitboard,
+}
+
+impl Hash for Board {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.white.hash(state);
+        self.black.hash(state);
+        self.kings.hash(state);
+    }
 }
 
 // Note: Most of the following methods are not checked for validity of their arguments. !!!
@@ -39,20 +50,18 @@ impl Board {
         };
     }
 
-    // ------------------- STATIC -------------------
-    pub(crate) fn get_id_from_coords(row: u8, col: u8) -> u8 {
+    fn get_id_from_coords(row: u8, col: u8) -> u8 {
         return row * 8 + col;
     }
 
-    pub(crate) fn is_valid_id(id: u8) -> bool {
+    fn is_valid_id(id: u8) -> bool {
         return id < 64 && (id % 8 + id / 8) % 2 == 0;
     }
 
-    pub(crate) fn is_valid_id_signed(id: i8) -> bool {
+    fn is_valid_id_signed(id: i8) -> bool {
         return id >= 0 && Self::is_valid_id(id as u8);
     }
 
-    // ------------------- PRIVATE -------------------
     fn is_valid_and_empty_signed(&self, id: i8) -> bool {
         return Self::is_valid_id_signed(id) && (self.white | self.black) & 1 << id as u8 == 0;
     }
@@ -101,13 +110,15 @@ impl Board {
         return s
             .into_iter()
             .map(|x| (id as i8 + x * dir, x * dir))
-            .filter(|x| self.is_valid_and_occupied_signed((*x).0, occ) && self.is_valid_and_empty_signed((*x).0 + (*x).1))
+            .filter(|x| {
+                self.is_valid_and_occupied_signed((*x).0, occ)
+                    && self.is_valid_and_empty_signed((*x).0 + (*x).1)
+            })
             .map(|x| (x.0 + x.1) as u8)
             .collect();
     }
 
-    // ------------------- PUB(CRATE) -------------------
-    pub(crate) fn get_piece(&self, id: u8) -> Option<Piece> {
+    fn get_piece(&self, id: u8) -> Option<Piece> {
         let piece_type = self.kings & 1 << id != 0;
 
         if self.white & 1 << id != 0 {
@@ -119,7 +130,25 @@ impl Board {
         return None;
     }
 
-    pub(crate) fn get_possible_moves_of(&self, id: u8) -> Option<(Vec<u8>, MoveType)> {
+    fn add_piece(&mut self, id: u8, piece_type: PieceType, color: PieceColor) {
+        if color == WHITE {
+            self.white |= 1 << id;
+        } else {
+            self.black |= 1 << id;
+        }
+
+        if piece_type == KING {
+            self.kings |= 1 << id;
+        }
+    }
+
+    fn remove_piece(&mut self, id: u8) {
+        self.white &= !(1 << id);
+        self.black &= !(1 << id);
+        self.kings &= !(1 << id);
+    }
+
+    fn get_possible_moves_of(&self, id: u8) -> Option<(Vec<u8>, MoveType)> {
         let piece = self.get_piece(id)?;
         let (color, piece_type) = piece;
 
@@ -131,13 +160,18 @@ impl Board {
         return Some((self.get_open_squares_for(id, piece_type, color), MOVE));
     }
 
-    // ------------------- PUBLIC -------------------
+    fn king_piece(&mut self, id: u8) {
+        self.kings |= 1 << id;
+    }
+
     pub fn to_string(&self, possible_moves: &Vec<(u8, Vec<u8>)>) -> String {
         let mut board = String::new();
 
         for row in (0..8).rev() {
             for col in 0..8 {
-                let highlight = possible_moves.iter().any(|x| x.0 == Self::get_id_from_coords(row, col));
+                let highlight = possible_moves
+                    .iter()
+                    .any(|x| x.0 == Self::get_id_from_coords(row, col));
                 board.push_str(
                     format!(
                         "|{}",
@@ -147,7 +181,13 @@ impl Board {
                             Some((WHITE, KING)) => 'W',
                             Some((BLACK, KING)) => 'B',
                             None => ' ',
-                        }.to_string().color(if highlight { Color::Green } else { Color::White })
+                        }
+                        .to_string()
+                        .color(if highlight {
+                            Color::Green
+                        } else {
+                            Color::White
+                        })
                     )
                     .as_str(),
                 );
@@ -157,7 +197,11 @@ impl Board {
 
         return board;
     }
-    
+
+    pub fn get_fields(&self) -> (u64, u64, u64) {
+        return (self.white, self.black, self.kings);
+    }
+
     pub fn get_piece_by_coords(&self, row: u8, col: u8) -> Option<Piece> {
         let id = Board::get_id_from_coords(row, col);
 
@@ -228,7 +272,7 @@ impl Board {
         return Some(self.get_possible_jumps_for(id, piece_type, color));
     }
 
-    pub fn move_piece(&mut self, from: u8, to: u8) -> bool {
+    pub fn move_piece(&mut self, from: u8, to: u8) -> (bool, Option<(u8, u8, Option<(u8, bool, bool)>, bool)>) {
         if self.white & 1 << from != 0 {
             self.white &= !(1 << from);
             self.white |= 1 << to;
@@ -243,33 +287,59 @@ impl Board {
         }
 
         let mut jumped = true;
+        let mut jumped_piece: Option<(u8, PieceType, PieceColor)> = None;
         // remove jumped pieces
         if (from as i8 - to as i8).abs() == 18 {
+            if let Some((piece_color, piece_type)) = self.get_piece((from + to) / 2) {
+                jumped_piece = Some(((from + to) / 2, piece_type, piece_color));
+            }
             self.remove_piece((from + to) / 2);
         } else if (from as i8 - to as i8).abs() == 14 {
+            if let Some((piece_color, piece_type)) = self.get_piece((from + to) / 2) {
+                jumped_piece = Some(((from + to) / 2, piece_type, piece_color));
+            }
             self.remove_piece((from + to) / 2);
         } else {
             jumped = false;
         }
 
         // promote to king
+        let mut kinged = true;
         if self.white & 1 << to != 0 && to / 8 == 7 {
             self.king_piece(to);
         } else if self.black & 1 << to != 0 && to / 8 == 0 {
             self.king_piece(to);
+        } else {
+            kinged = false;
         }
 
-        return jumped;
+        // let last_move = Some((from, to, jumped_piece, kinged));
+        return (jumped, Some((from, to, jumped_piece, kinged)));
     }
 
-    pub fn remove_piece(&mut self, id: u8) {
-        self.white &= !(1 << id);
-        self.black &= !(1 << id);
-        self.kings &= !(1 << id);
-    }
+    pub fn undo_move(&mut self, last_move: Option<(u8, u8, Option<(u8, PieceType, PieceColor)>, bool)>) {
+        if let Some((from, to, jumped_piece, kinged)) = last_move {
+            if self.white & 1 << to != 0 {
+                self.white &= !(1 << to);
+                self.white |= 1 << from;
+            } else if self.black & 1 << to != 0 {
+                self.black &= !(1 << to);
+                self.black |= 1 << from;
+            }
 
-    pub fn king_piece(&mut self, id: u8) {
-        self.kings |= 1 << id;
+            if self.kings & 1 << to != 0 {
+                self.kings &= !(1 << to);
+                self.kings |= 1 << from;
+            }
+
+            if let Some((id, piece_type, piece_color)) = jumped_piece {
+                self.add_piece(id, piece_type, piece_color);
+            }
+
+            if kinged {
+                self.kings &= !(1 << from);
+            }
+        }
     }
 
     pub fn eval_v1(&self, color: PieceColor) -> f32 {
@@ -295,7 +365,8 @@ impl Board {
                     let color_multiplier = if piece_color == color { 1. } else { -1. };
                     let position_multiplier: f32;
                     if piece_type == KING {
-                        position_multiplier = 3. - ((i as f32 - 3.5).abs() + (j as f32 - 3.5).abs()) / 8.;
+                        position_multiplier =
+                            3. - ((i as f32 - 3.5).abs() + (j as f32 - 3.5).abs()) / 8.;
                     } else {
                         position_multiplier = if piece_color == WHITE {
                             (1 + i) as f32 / 8.
