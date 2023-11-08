@@ -19,8 +19,8 @@ impl BotPlayer {
         return MinimaxPlayer::new(depth, eval_version);
     }
 
-    pub fn alpha_beta() -> AlphaBetaPlayer {
-        todo!()
+    pub fn alpha_beta(depth: Depth, eval_version: u8) -> AlphaBetaPlayer {
+        return AlphaBetaPlayer::new(depth, eval_version);
     }
 
     pub fn monte_carlo() -> MonteCarloPlayer {
