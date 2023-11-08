@@ -12,12 +12,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("Minimax depth 5 Start layout", |b| {
         b.iter(|| {
             minimax_player_static.get_move(black_box(&board_start), black_box(&moves));
-            minimax_player_static.clear_transposition_table();
         })
-    });
-
-    c.bench_function("Minimax depth 5 Start layout no chack clear", |b| {
-        b.iter(|| minimax_player_static.get_move(black_box(&board_start), black_box(&moves)))
     });
 }
 

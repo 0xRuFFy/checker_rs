@@ -26,8 +26,6 @@ impl MinimaxPlayer {
 
     fn minimax(&mut self, board: &core::Board, depth: u8, maximizing_player: bool) -> f32 {
         if let Some(value) = self.transposition_table.get(board) {
-            // println!("Cache hit");
-            // TODO: Cache is not updated -> cache position must not have been calculated with the same depth
             return *value;
         }
 
@@ -65,9 +63,17 @@ impl MinimaxPlayer {
         for (from, tos) in moves {
             for to in tos {
                 let mut new_board = board.clone();
-                new_board.move_piece(from, to);
+                let jumped = new_board.move_piece(from, to);
 
-                let value = self.minimax(&new_board, depth - 1, !maximizing_player);
+                let value = self.minimax(
+                    &new_board,
+                    depth - 1,
+                    if jumped {
+                        maximizing_player
+                    } else {
+                        !maximizing_player
+                    },
+                );
                 self.transposition_table.insert(new_board, value);
                 if maximizing_player {
                     best_value = best_value.max(value);
@@ -105,20 +111,21 @@ impl Player for MinimaxPlayer {
         let depth = match self.depth {
             Depth::Static(depth) => depth,
             Depth::Dynamic => {
-                let pmc = possible_moves
-                    .iter()
-                    .map(|(_, tos)| tos.len())
-                    .sum::<usize>();
+                let pc = board.black_count() + board.white_count();
                 // TODO: Use more sophisticated formula
-                if pmc < 2 {
-                    12
-                } else if pmc < 4 {
-                    10
-                } else {
+                if pc < 8 {
+                    11
+                } else if pc < 15 {
+                    8
+                } else if pc < 20 {
                     7
+                } else {
+                    6
                 }
             }
         };
+        println!("Depth: {}", depth);
+        self.clear_transposition_table();
         for (from, tos) in possible_moves {
             for to in tos {
                 let mut new_board = board.clone();
@@ -134,6 +141,7 @@ impl Player for MinimaxPlayer {
         }
 
         // println!("{}", self.transposition_table.len());
+        println!("Best move: {} -> {}", best_move.0, best_move.1);
         return best_move;
     }
 }
