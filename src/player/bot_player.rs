@@ -1,8 +1,8 @@
 use crate::game::GameState;
 
 use super::{
-    alpha_zero_player::AlphaZeroPlayer,
-    minimax_player::MinimaxPlayer, monte_carlo_player::MonteCarloPlayer,
+    alpha_zero_player::AlphaZeroPlayer, minimax_player::MinimaxPlayer,
+    monte_carlo_player::MonteCarloPlayer,
 };
 use checkers_core as core;
 

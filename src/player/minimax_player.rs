@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
 use super::{bot_player::Depth, Player};
-use crate::{game::{GameState, CheckersGame}, player::bot_player::BotPlayer};
+use crate::{
+    game::{CheckersGame, GameState},
+    player::bot_player::BotPlayer,
+};
 use checkers_core as core;
 
 const WIN_BASE_SCORE: f32 = 200.;
@@ -145,7 +148,13 @@ impl Player for MinimaxPlayer {
                 let mut new_board = board.clone();
                 new_board.move_piece(*from, *to);
 
-                let value = self.minimax(&mut new_board, depth, false, -self.max_score, self.max_score);
+                let value = self.minimax(
+                    &mut new_board,
+                    depth,
+                    false,
+                    -self.max_score,
+                    self.max_score,
+                );
                 println!("{} -> {}: {}", from, to, value);
                 if value > best_value {
                     best_value = value;
@@ -155,7 +164,11 @@ impl Player for MinimaxPlayer {
         }
 
         // println!("Best move: {} -> {}", best_move.0, best_move.1);
-        println!("Best move: {} -> {}", CheckersGame::id_to_chess_notation(best_move.0), CheckersGame::id_to_chess_notation(best_move.1));
+        println!(
+            "Best move: {} -> {}",
+            CheckersGame::id_to_chess_notation(best_move.0),
+            CheckersGame::id_to_chess_notation(best_move.1)
+        );
         return best_move;
     }
 }
