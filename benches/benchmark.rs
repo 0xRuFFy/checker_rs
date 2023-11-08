@@ -7,18 +7,11 @@ fn criterion_benchmark(c: &mut Criterion) {
     let board_start = core::Board::new();
     let moves = board_start.get_possible_moves(&core::board::WHITE);
 
-    let mut minimax_player_static = player::BotPlayer::minimax(Depth::Static(5), 2);
-    let mut alpha_beta_player_static = player::BotPlayer::alpha_beta(Depth::Static(5), 2);
+    let mut minimax_player = player::BotPlayer::minimax(Depth::Static(5), 2);
     // let mminimax_player = player::BotPlayer::minimax(Depth::Dynamic, 2);
     c.bench_function("Minimax depth 5 Start layout", |b| {
         b.iter(|| {
-            minimax_player_static.get_move(black_box(&board_start), black_box(&moves));
-        })
-    });
-
-    c.bench_function("AlphaBeta depth 5 Start layout", |b| {
-        b.iter(|| {
-            alpha_beta_player_static.get_move(black_box(&board_start), black_box(&moves));
+            minimax_player.get_move(black_box(&board_start), black_box(&moves));
         })
     });
 }

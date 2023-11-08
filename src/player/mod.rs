@@ -1,4 +1,3 @@
-mod alpha_beta_player;
 mod alpha_zero_player;
 pub mod bot_player;
 mod human_player;

@@ -10,10 +10,9 @@ fn main() {
     println!("Hello, world!");
 
     let mut game = CheckersGame::new(
-        Box::new(player::HumanPlayer::new()),
         // Box::new(player::BotPlayer::minimax(bot_player::Depth::Dynamic, 2)),
-        // Box::new(player::BotPlayer::alpha_beta(bot_player::Depth::Static(6), 2)),
-        Box::new(player::BotPlayer::minimax(bot_player::Depth::Static(6), 2)),
+        Box::new(player::BotPlayer::minimax(bot_player::Depth::Static(8), 2)),
+        Box::new(player::HumanPlayer::new()),
         // Box::new(player::BotPlayer::minimax(bot_player::Depth::Static(5), 1)),
         // Box::new(player::HumanPlayer::new()),
         // Box::new(player::BotPlayer::minimax(bot_player::Depth::Dynamic, 2)),
