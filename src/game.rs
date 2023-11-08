@@ -32,14 +32,14 @@ impl CheckersGame {
 
     fn show(&self, possible_moves: &Vec<(u8, Vec<u8>)>) {
         println!("{}", self.board.to_string(&possible_moves));
-        for (i, (from, moves)) in possible_moves.clone().into_iter().enumerate() {
-            print!("{}: {} -> {{ ", i, from);
-            for (j, to) in moves.into_iter().enumerate() {
-                print!("{}: {}, ", j, to);
-            }
-            print!("}} ");
-        }
-        println!();
+        // for (i, (from, moves)) in possible_moves.clone().into_iter().enumerate() {
+        //     print!("{}: {} -> {{\n", i, from);
+        //     for (j, to) in moves.into_iter().enumerate() {
+        //         print!("    {}: {}, \n", j, to);
+        //     }
+        //     print!("}}\n");
+        // }
+        // println!();
     }
 
     fn check_game_state(&mut self) -> bool {
