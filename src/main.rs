@@ -1,33 +1,26 @@
-#![allow(dead_code, unused_imports, unused_variables)]
-mod game;
-mod player;
+mod logic;
+mod util;
 
-use game::CheckersGame;
-use player::bot_player;
+use logic::Game;
+
+use crate::logic::{eval, HumanPlayer, MinimaxPlayer};
 
 fn main() {
     println!("Hello, world!");
 
-    let mut game = CheckersGame::new(
-        // Box::new(player::BotPlayer::minimax(bot_player::Depth::Dynamic, 2)),
-        Box::new(player::BotPlayer::minimax(bot_player::Depth::Static(8), 2)),
-        Box::new(player::HumanPlayer::new()),
-        // Box::new(player::BotPlayer::minimax(bot_player::Depth::Static(7), 2)),
-        // Box::new(player::HumanPlayer::new()),
-        // Box::new(player::BotPlayer::minimax(bot_player::Depth::Dynamic, 2)),
-        // Box::new(player::BotPlayer::minimax(4, 2)),
+    // let mut game = Game::new(Box::new(HumanPlayer::new()), Box::new(HumanPlayer::new()));
+    let mut game = Game::new(
+        Box::new(MinimaxPlayer::new(9, eval::v2)),
+        Box::new(HumanPlayer::new()),
     );
-
     game.play();
 
-    // let mut board = checkers_core::Board::new();
+    // let mut board = Board::new();
     // println!("{}", board);
-    // board.move_piece(18, 58);
+    // println!("{:?}", board.possible_moves(piece::WHITE));
+    // // println!("{:?}", board.possible_jumps_from(18));
+
+    // let move_info = board.move_piece(18, 25);
+    // println!("{:?}", move_info);
     // println!("{}", board);
-    // board.undo_move();
-    // println!("{}", board);
-    // println!("White 1:{}", board.eval_v1(WHITE));
-    // println!("White 2:{}", board.eval_v2(WHITE));
-    // println!("Black 1:{}", board.eval_v1(BLACK));
-    // println!("Black 2:{}", board.eval_v2(BLACK));
 }
