@@ -3,7 +3,6 @@ use crate::logic::{
     Board,
 };
 
-#[allow(dead_code)]
 pub fn v1(board: &Board, color: PieceColor) -> f32 {
     let mut value = 0.;
     let white_multiplier = if color == piece::WHITE { 1. } else { -1. };
