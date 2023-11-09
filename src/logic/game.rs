@@ -68,7 +68,11 @@ impl Game {
         // println!();
     }
 
-    fn check_game_state(&mut self, possible_moves: &Vec<PossibleMoves>, color: piece::PieceColor) -> bool {
+    fn check_game_state(
+        &mut self,
+        possible_moves: &Vec<PossibleMoves>,
+        color: piece::PieceColor,
+    ) -> bool {
         if possible_moves.is_empty() {
             self.state = GameState::Win(!color);
             return true;

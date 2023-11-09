@@ -1,10 +1,9 @@
 mod logic;
 mod util;
 
-use logic::Game;
-
 #[allow(unused_imports)]
 use crate::logic::{eval, HumanPlayer, MinimaxPlayer};
+use logic::Game;
 
 fn main() {
     println!("Hello, world!");
