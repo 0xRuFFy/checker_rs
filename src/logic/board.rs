@@ -62,7 +62,7 @@ impl Board {
 
     /* --------------| Static methods |-------------- */
     pub fn coords_to_bitboard(row: u8, col: u8) -> Bitboard {
-        return 1 << (row * 8 + col);
+        1 << (row * 8 + col)
     }
 
     /* --------------| Getters |-------------- */
@@ -93,22 +93,22 @@ impl Board {
     /* --------------| Methods |-------------- */
     #[inline]
     pub fn white_count(&self) -> u8 {
-        return self.white.count_ones() as u8;
+        self.white.count_ones() as u8
     }
 
     #[inline]
     pub fn black_count(&self) -> u8 {
-        return self.black.count_ones() as u8;
+        self.black.count_ones() as u8
     }
 
     #[inline]
     pub fn white_king_count(&self) -> u8 {
-        return self.count_kings(piece::WHITE);
+        self.count_kings(piece::WHITE)
     }
 
     #[inline]
     pub fn black_king_count(&self) -> u8 {
-        return self.count_kings(piece::BLACK);
+        self.count_kings(piece::BLACK)
     }
 
     pub fn possible_moves(&self, color: PieceColor) -> Vec<PossibleMoves> {
@@ -126,7 +126,7 @@ impl Board {
             let from = bitboard.trailing_zeros() as u8;
             let (tos, move_type) = self.get_possible_moves_from(from).unwrap();
             force_jump |= move_type == JUMP;
-            if tos.len() > 0 {
+            if !tos.is_empty() {
                 if move_type == JUMP {
                     jumps.push(PossibleMoves { from, to: tos });
                 } else if !force_jump {
@@ -178,7 +178,7 @@ impl Board {
         let mut jumped_piece_id = None;
         let move_distance = from.abs_diff(*to);
         if move_distance == LEFT_DISTANCE * 2 || move_distance == RIGHT_DISTANCE * 2 {
-            if let Some(piece) = self.get_piece(1 << (from + to) / 2) {
+            if let Some(piece) = self.get_piece(1 << ((from + to) / 2)) {
                 jumped_piece = Some(piece);
                 jumped_piece_id = Some((from + to) / 2);
                 self.remove_piece(&jumped_piece_id.unwrap());
@@ -233,27 +233,27 @@ impl Board {
 
     /* --------------| Private methods |-------------- */
     fn is_valid_id(id: &i8) -> bool {
-        return *id >= 0 && *id < 64 && (*id % 8 + *id / 8) % 2 == 0;
+        *id >= 0 && *id < 64 && (*id % 8 + *id / 8) % 2 == 0
     }
 
     fn is_valid_and_empty(&self, id: &i8) -> bool {
-        return Self::is_valid_id(id) && (self.white | self.black) & 1 << (*id) as u8 == 0;
+        Self::is_valid_id(id) && (self.white | self.black) & 1 << (*id) as u8 == 0
     }
 
     fn get_opponent(&self, color: &PieceColor) -> &Bitboard {
-        match color {
-            &piece::WHITE => &self.black,
-            &piece::BLACK => &self.white,
+        match *color {
+            piece::WHITE => &self.black,
+            piece::BLACK => &self.white,
         }
     }
 
     fn count_kings(&self, color: PieceColor) -> u8 {
-        return (if color == piece::WHITE {
+        (if color == piece::WHITE {
             self.white
         } else {
             self.black
         } & self.kings)
-            .count_ones() as u8;
+            .count_ones() as u8
     }
 
     fn get_open_squares_from(&self, from: &u8, piece: &Piece) -> Vec<u8> {
@@ -287,11 +287,11 @@ impl Board {
         let piece = self.get_piece(1 << from)?;
 
         let jumps = self.get_jumps_from(&from, &piece);
-        if jumps.len() > 0 {
+        if !jumps.is_empty() {
             return Some((jumps, JUMP));
         }
 
-        return Some((self.get_open_squares_from(&from, &piece), STANDARD));
+        Some((self.get_open_squares_from(&from, &piece), STANDARD))
     }
 
     fn add_piece(&mut self, id: &u8, piece: &Piece) {

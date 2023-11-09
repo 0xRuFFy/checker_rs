@@ -92,7 +92,7 @@ impl Player for MinimaxPlayer {
         self.color = color;
     }
 
-    fn get_move(&mut self, board: &Board, possible_moves: &Vec<PossibleMoves>) -> (u8, u8) {
+    fn get_move(&mut self, board: &Board, possible_moves: &[PossibleMoves]) -> (u8, u8) {
         let mut board_clone = board.clone();
         let mut best_move = (0, 0);
         let mut best_value = -self.max_value;

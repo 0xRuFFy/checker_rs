@@ -27,7 +27,7 @@ macro_rules! break_if {
     };
 }
 
-pub fn chess_to_checkers_id(id: &u8) -> u8 {
+pub fn _chess_to_checkers_id(id: &u8) -> u8 {
     let row = *id / 8;
     let col = *id % 8;
     row * 4 + col / 2

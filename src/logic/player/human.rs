@@ -16,7 +16,7 @@ impl Player for HumanPlayer {
         self.color = color;
     }
 
-    fn get_move(&mut self, board: &Board, possible_moves: &Vec<PossibleMoves>) -> (u8, u8) {
+    fn get_move(&mut self, _board: &Board, possible_moves: &[PossibleMoves]) -> (u8, u8) {
         println!("{:?}", possible_moves);
         let mut input = String::new();
         let from: u8;
@@ -62,9 +62,9 @@ impl Player for HumanPlayer {
             };
         }
 
-        return (
+        (
             possible_moves[from as usize].from,
             possible_moves[from as usize].to[to as usize],
-        );
+        )
     }
 }

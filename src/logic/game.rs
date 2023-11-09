@@ -40,9 +40,8 @@ impl Game {
             self.current = !self.current;
         }
 
-        match self.state {
-            GameState::Win(color) => println!("{} wins!", if color { "White" } else { "Black" }),
-            _ => (),
+        if let GameState::Win(color) = self.state {
+            println!("{} wins!", if color { "White" } else { "Black" })
         }
     }
 
@@ -56,7 +55,7 @@ impl Game {
     }
 
     /* --------------| Private methods |-------------- */
-    fn show(&self, possible_moves: &Vec<PossibleMoves>) {
+    fn show(&self, _possible_moves: &[PossibleMoves]) {
         println!("{}", self.board);
         // println!("{}", self.board.to_string(&possible_moves));
         // for (i, (from, moves)) in possible_moves.clone().into_iter().enumerate() {
@@ -78,10 +77,10 @@ impl Game {
         false
     }
 
-    fn turn(&mut self, possible_moves: &Vec<PossibleMoves>) {
+    fn turn(&mut self, possible_moves: &[PossibleMoves]) {
         self.show(possible_moves);
         let (from, to) = self.player[self.current_player].get_move(&self.board, possible_moves);
-        let mut move_info = self.board.move_piece(&from, &to);
+        let move_info = self.board.move_piece(&from, &to);
         // continue to jump if possible
         if move_info.jumped_piece.is_some() {
             if let Some(possible_jumps) = self.board.possible_jumps_from(to) {
@@ -98,6 +97,6 @@ impl Game {
             }
         }
 
-        self.current_player = self.current_player ^ 1;
+        self.current_player ^= 1;
     }
 }

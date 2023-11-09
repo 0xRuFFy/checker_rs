@@ -3,6 +3,7 @@ use crate::logic::{
     Board,
 };
 
+#[allow(dead_code)]
 pub fn v1(board: &Board, color: PieceColor) -> f32 {
     let mut value = 0.;
     let white_multiplier = if color == piece::WHITE { 1. } else { -1. };
@@ -26,16 +27,14 @@ pub fn v2(board: &Board, color: PieceColor) -> f32 {
         let id = all.trailing_zeros() as u8;
         let piece = board.get_piece(1 << id).unwrap();
         let color_multiplier = if piece.color == color { 1. } else { -1. };
-        let position_multiplier: f32;
-        if piece.piece_type == piece::KING {
-            position_multiplier =
-                3. - (((id / 8) as f32 - 3.5).abs() + ((id % 8) as f32 - 3.5).abs()) / 8.;
+        let position_multiplier = if piece.piece_type == piece::KING {
+            3. - (((id / 8) as f32 - 3.5).abs() + ((id % 8) as f32 - 3.5).abs()) / 8.
         } else {
-            position_multiplier = match piece.color {
+            match piece.color {
                 piece::WHITE => (1 + id / 8) as f32 / 8.,
                 piece::BLACK => (8 - id / 8) as f32 / 8.,
-            };
-        }
+            }
+        };
         value += color_multiplier * position_multiplier;
 
         p_count -= 1;
