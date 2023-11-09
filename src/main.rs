@@ -3,6 +3,7 @@ mod util;
 
 use logic::Game;
 
+#[allow(unused_imports)]
 use crate::logic::{eval, HumanPlayer, MinimaxPlayer};
 
 fn main() {
@@ -10,7 +11,7 @@ fn main() {
 
     // let mut game = Game::new(Box::new(HumanPlayer::new()), Box::new(HumanPlayer::new()));
     let mut game = Game::new(
-        Box::new(MinimaxPlayer::new(9, eval::v2)),
+        Box::new(MinimaxPlayer::new(7, eval::v2)),
         Box::new(HumanPlayer::new()),
     );
     game.play();

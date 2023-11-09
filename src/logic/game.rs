@@ -35,7 +35,7 @@ impl Game {
     pub fn play(&mut self) {
         while self.state == GameState::InProgress {
             let possible_moves = self.board.possible_moves(self.current);
-            break_if!(self.check_game_state(&possible_moves));
+            break_if!(self.check_game_state(&possible_moves, self.current));
             self.turn(&possible_moves);
             self.current = !self.current;
         }
@@ -68,9 +68,9 @@ impl Game {
         // println!();
     }
 
-    fn check_game_state(&mut self, possible_moves: &Vec<PossibleMoves>) -> bool {
+    fn check_game_state(&mut self, possible_moves: &Vec<PossibleMoves>, color: piece::PieceColor) -> bool {
         if possible_moves.is_empty() {
-            self.state = GameState::Win(self.current);
+            self.state = GameState::Win(!color);
             return true;
         }
 
@@ -90,7 +90,7 @@ impl Game {
                         to: possible_jumps,
                     };
                     let possible_moves = vec![possible_moves];
-                    if !self.check_game_state(&possible_moves) {
+                    if !self.check_game_state(&possible_moves, self.current) {
                         self.turn(&possible_moves);
                     }
                 }

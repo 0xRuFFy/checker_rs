@@ -6,6 +6,7 @@ pub struct HumanPlayer {
 }
 
 impl HumanPlayer {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self { color: false }
     }
