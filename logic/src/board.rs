@@ -367,6 +367,12 @@ impl Board {
     /* --------------| Evaluators |-------------- */
 }
 
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Hash for Board {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.white.hash(state);

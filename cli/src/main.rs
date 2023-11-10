@@ -1,6 +1,5 @@
 use clap::Parser;
 use colored::Colorize;
-use logic;
 
 #[derive(Parser, Debug)]
 struct Cli {
@@ -35,6 +34,8 @@ fn main() {
         },
     );
 
+    // TODO: Make current player [W/B] a parameter ... in FEN?
+
     let w_1 = 40 - args.depth.to_string().len();
     let w_2 = 33 - args.eval.to_string().len();
 
@@ -53,16 +54,14 @@ fn main() {
         "|-----------------------------------------------|".dimmed()
     );
     println!(
-        "{}{}{}{:>w_1$}",
+        "{}Depth: {}{:>w_1$}",
         "| ".dimmed(),
-        "Depth: ",
         args.depth.to_string().bold().cyan(),
         "|".dimmed()
     );
     println!(
-        "{}{}{}{:>w_2$}",
+        "{}Eval Version: {}{:>w_2$}",
         "| ".dimmed(),
-        "Eval Version: ",
         args.eval.to_string().bold().cyan(),
         "|".dimmed()
     );

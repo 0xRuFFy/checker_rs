@@ -6,9 +6,14 @@ pub struct HumanPlayer {
 }
 
 impl HumanPlayer {
-    #[allow(dead_code)]
     pub fn new() -> Self {
         Self { color: false }
+    }
+}
+
+impl Default for HumanPlayer {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
