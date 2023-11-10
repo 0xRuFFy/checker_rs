@@ -28,8 +28,8 @@ fn main() {
     let mut analyser = logic::MinimaxPlayer::new(
         args.depth,
         match args.eval {
-            1 => logic::eval::v1,
-            2 => logic::eval::v2,
+            1 => logic::v1,
+            2 => logic::v2,
             _ => panic!("Invalid evaluation function"),
         },
     );

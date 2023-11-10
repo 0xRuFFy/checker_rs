@@ -2,9 +2,9 @@ pub mod eval;
 mod human;
 mod minimax;
 
+pub use eval::{v1, v2};
 pub use human::HumanPlayer;
 pub use minimax::MinimaxPlayer;
-pub use eval::{v1, v2};
 
 use crate::board::{Board, PossibleMoves};
 

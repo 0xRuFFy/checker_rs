@@ -6,4 +6,4 @@ mod util;
 
 pub use board::Board;
 pub use game::Game;
-pub use player::{eval, HumanPlayer, MinimaxPlayer};
+pub use player::{v1, v2, HumanPlayer, MinimaxPlayer};
