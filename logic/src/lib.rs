@@ -1,9 +1,9 @@
 mod board;
 mod game;
-pub mod piece;
+mod piece;
 mod player;
+mod util;
 
-pub use board::{Board, PossibleMoves};
+pub use board::Board;
 pub use game::Game;
-pub use piece::Piece;
 pub use player::{eval, HumanPlayer, MinimaxPlayer};

@@ -1,11 +1,12 @@
-use super::{Board, PossibleMoves};
-
 pub mod eval;
 mod human;
 mod minimax;
 
 pub use human::HumanPlayer;
 pub use minimax::MinimaxPlayer;
+pub use eval::{v1, v2};
+
+use crate::board::{Board, PossibleMoves};
 
 pub trait Player {
     fn init(&mut self, color: bool);

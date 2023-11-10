@@ -1,6 +1,6 @@
-use crate::break_if;
-
-use super::{piece, player::Player, Board, PossibleMoves};
+use crate::board::PossibleMoves;
+use crate::player::Player;
+use crate::{board::Board, break_if, piece};
 
 #[derive(Debug, PartialEq)]
 pub enum GameState {
