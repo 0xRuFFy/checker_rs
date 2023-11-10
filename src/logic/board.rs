@@ -6,6 +6,7 @@ use crate::{
 use std::{
     fmt::{Display, Formatter, Result},
     hash::{Hash, Hasher},
+    result,
 };
 
 pub type Bitboard = u64;
@@ -58,6 +59,54 @@ impl Board {
             black: DEFAULT_BLACK,
             kings: EMPTY,
         }
+    }
+
+    pub fn from_fen(fen: &str) -> result::Result<Self, &'static str> {
+        let mut board = Self {
+            white: EMPTY,
+            black: EMPTY,
+            kings: EMPTY,
+        };
+        let mut row = 7u8;
+        let mut col = 0u8;
+        for c in fen.chars() {
+            if c == '/' {
+                row -= 1;
+                col = 0;
+                if row > 7 {
+                    // return Err("Invalid FEN string");
+                    return Err("Invalid FEN string. Cannot have more than 8 rows.");
+                }
+            } else if c.is_ascii_digit() {
+                col += c.to_digit(10).unwrap() as u8;
+                if col > 8 {
+                    return Err("Invalid FEN string. Cannot have more than 8 columns per row.");
+                }
+            } else {
+                let piece = match c {
+                    'M' => Piece {
+                        color: piece::WHITE,
+                        piece_type: false,
+                    },
+                    'K' => Piece {
+                        color: piece::WHITE,
+                        piece_type: true,
+                    },
+                    'm' => Piece {
+                        color: piece::BLACK,
+                        piece_type: false,
+                    },
+                    'k' => Piece {
+                        color: piece::BLACK,
+                        piece_type: true,
+                    },
+                    _ => return Err("Invalid FEN string. Invalid character! Only allowed characters are: 'w', 'W', 'b', 'B', '/', '1', '2', '3', '4', '5', '6', '7', '8'"),
+                };
+                board.add_piece(&(row * 8 + col), &piece);
+                col += 1;
+            }
+        }
+        Ok(board)
     }
 
     /* --------------| Static methods |-------------- */
