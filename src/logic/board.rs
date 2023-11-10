@@ -77,7 +77,7 @@ impl Board {
                     // return Err("Invalid FEN string");
                     return Err("Invalid FEN string. Cannot have more than 8 rows.");
                 }
-            } else if c.is_digit(10) {
+            } else if c.is_ascii_digit() {
                 col += c.to_digit(10).unwrap() as u8;
                 if col > 8 {
                     return Err("Invalid FEN string. Cannot have more than 8 columns per row.");
