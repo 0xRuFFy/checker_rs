@@ -1,11 +1,11 @@
 use super::Player;
 use crate::{
-    logic::{
-        piece::{self, PieceColor},
-        Board, Game, PossibleMoves,
-    },
+    board::{Board, PossibleMoves},
+    game::Game,
+    piece::{self, PieceColor},
     return_if, return_if_else,
 };
+use colored::Colorize;
 use std::collections::HashMap;
 
 const WIN_BASE_VALUE: f32 = 200.;
@@ -84,6 +84,53 @@ impl MinimaxPlayer {
         // TODO: try not to use clone
         self.transposition_table.insert(board.clone(), best_value);
         best_value
+    }
+
+    pub fn analyse(&mut self, board: &Board) {
+        let possible_moves = board.possible_moves(self.color);
+
+        let mut board_clone = board.clone();
+        let mut best_move = (0, 0);
+        let mut best_value = -self.max_value;
+
+        self.transposition_table.clear();
+        for p_move in &possible_moves {
+            for to in &p_move.to {
+                let move_info = board_clone.move_piece(&p_move.from, to);
+                let value = self.minimax(
+                    &mut board_clone,
+                    self.depth,
+                    false,
+                    -self.max_value,
+                    self.max_value,
+                );
+                println!(
+                    "{}",
+                    format!(
+                        "({} -> {}) | {}",
+                        p_move.from,
+                        *to,
+                        value.to_string().dimmed()
+                    )
+                    .white()
+                );
+                board_clone.undo_move(move_info);
+                if value > best_value {
+                    best_value = value;
+                    best_move = (p_move.from, *to);
+                }
+            }
+        }
+
+        println!(
+            "{}",
+            format!(
+                "Best move: ({} -> {}) | {}",
+                best_move.0, best_move.1, best_value
+            )
+            .green()
+            .bold()
+        );
     }
 }
 

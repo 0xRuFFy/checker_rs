@@ -1,8 +1,9 @@
-use super::piece::{PieceColor, LEFT_DISTANCE, RIGHT_DISTANCE};
 use crate::{
-    logic::{piece, Piece},
+    piece::{self, Piece},
     return_if,
 };
+
+use super::piece::{PieceColor, LEFT_DISTANCE, RIGHT_DISTANCE};
 use std::{
     fmt::{Display, Formatter, Result},
     hash::{Hash, Hasher},
@@ -364,6 +365,12 @@ impl Board {
     }
 
     /* --------------| Evaluators |-------------- */
+}
+
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Hash for Board {

@@ -1,6 +1,6 @@
-use crate::logic::{
+use crate::{
+    board::Board,
     piece::{self, PieceColor},
-    Board,
 };
 
 pub fn v1(board: &Board, color: PieceColor) -> f32 {
